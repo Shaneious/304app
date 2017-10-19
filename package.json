@@ -1,7 +1,7 @@
 {
   "name": "304app",
   "version": "1.0.0",
-  "description": "",
+  "description": "stats304 data collection app",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,6 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.2"
+    "after-load": "^1.0.4",
+    "body-parser": "^1.18.2",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.5",
+    "google-spreadsheet": "^2.0.4",
+    "unirest": "^0.5.1"
   }
 }
