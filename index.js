@@ -1,8 +1,6 @@
 var unirest = require('unirest');
 var express = require('express');
 var bodyParser = require('body-parser');
-var TOTAL_PAGES = 0;
-var ALL_CATEGORIES = [];
 
 require('dotenv').config()
 var app = express();
@@ -32,11 +30,7 @@ function getCategoryItems(categoryName) {
 					pages.push(categoryMembers[i]);
 				}
 			}
-			// console.log(`Category: ${categoryName}`);
-			// console.log(`Pages: ${pages.length}`);
-			// console.log(`Categories: ${categories.length}`);
-			// console.log(`Portals: ${portals.length}`);
-			// console.log("--------------------------------------------------");
+
 			resolve(
 				{
 					subCategories: categories,
@@ -47,32 +41,38 @@ function getCategoryItems(categoryName) {
 	});
 }
 
+getCategoriesPageCount([{title:"Category:Artificial intelligence"}], 2)
+	.then(pageCount => {
+    console.log(pageCount);
+    console.log("finished.");
+  });
 
-var count = 0;
+function getCategoriesPageCount(categories, depth) {
+	return new Promise(resolve => {
+		if(depth <= 0 || categories.length <= 0) {
+			//console.log("depth reached");
+			resolve(0);
+		} else {
+			// traverse each category
+			let fullPageCount = 0;
+			let callCount = 0;
+			for(var i=0; i < categories.length; i++) {
+				getCategoryItems(categories[i].title).then(obj => {
 
-traverseCategories([{title: "Category:Artificial intelligence"}], 2);
-
-function traverseCategories(categories, depth) {
-	if(categories.length <= 0 || depth <= 0) {
-		console.log("depth reached");
-		console.log(`CURRENT TOTAL PAGES: ${TOTAL_PAGES}`);
-		return;
-	} else {
-		console.log(`CURRENT TOTAL PAGES: ${TOTAL_PAGES}`);
-		// traverse each category
-		for(var i=0; i < categories.length; i++) {
-			getCategoryItems(categories[i].title).then(obj => {
-				// console.log(newCategories);
-				// let allCategories = categories.concat(newCategories);
-				// allCategories.splice(0,1);
-				// console.log(allCategories);
-				// idkWhat(allCategories, 0);
-				TOTAL_PAGES += obj.pageCount;
-				traverseCategories(obj.subCategories, depth-1);
-			});
+					// increment page count
+					getCategoriesPageCount(obj.subCategories, depth-1)
+						.then(subPageCount => {
+							callCount ++;
+							fullPageCount += (subPageCount + obj.pageCount);
+							if(callCount == categories.length){
+								resolve(fullPageCount);
+							}
+						});
+				});
+			}
+			
 		}
-		
-	}
+	});
 }
 
 
