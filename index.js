@@ -1,6 +1,8 @@
 var unirest = require('unirest');
 var express = require('express');
 var bodyParser = require('body-parser');
+var wikiData = require('./data.json');
+var fs = require('fs');
 
 require('dotenv').config()
 var app = express();
@@ -34,7 +36,8 @@ function getCategoryItems(categoryName) {
 			resolve(
 				{
 					subCategories: categories,
-					pageCount: pages.length
+          pageCount: pages.length,
+          pages: pages
 				}
 			);
 		  });
@@ -63,8 +66,12 @@ function getCategoriesPageCount(categories, depth) {
 					getCategoriesPageCount(obj.subCategories, depth-1)
 						.then(subPageCount => {
 							callCount ++;
-							fullPageCount += (subPageCount + obj.pageCount);
-							if(callCount == categories.length){
+              fullPageCount += (subPageCount + obj.pageCount);
+              wikiData = require('./data.json');
+              wikiData.concat(obj.pages);
+              fs.writeFile('data.json', JSON.stringify(wikiData), 'utf8', ()=>{});
+
+							if(callCount == categories.length) {
 								resolve(fullPageCount);
 							}
 						});

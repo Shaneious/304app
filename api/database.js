@@ -4,7 +4,6 @@ var GoogleSpreadsheet = require('google-spreadsheet');
 
 const SPREADSHEET_ID = '1Lv9abGVXsvtzOIt3k7y69qzyhPTP1bgyn_yuI07BQBQ';
 const ARTICLE_SHEET = 1;
-const EDITS_SHEET = 2;
 
 var doc = new GoogleSpreadsheet(SPREADSHEET_ID);
 
@@ -37,6 +36,14 @@ router.get('/all_data', function(req, res) {
       handleSend(res,err,rows);
     });
   });
+
+router.post('/addRow', function(req, res) {
+  const data = req.body;
+
+  doc.addRow(ARTICLE_SHEET,data.newRow, (err, row) => {
+    handleSend(res,err,"row added");
+  });
+});
 
 
 module.exports = router;
