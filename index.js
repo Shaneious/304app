@@ -2,7 +2,10 @@ var unirest = require('unirest');
 var express = require('express');
 var bodyParser = require('body-parser');
 var wikiData = require('./data.json');
+var htmlToText = require('html-to-text');
+var wtf = require('wtf_wikipedia');
 var fs = require('fs');
+var COUNTER = 0;
 
 require('dotenv').config()
 var app = express();
@@ -11,10 +14,27 @@ console.log("We are rolling bois");
 
 app.use('/',express.static('public'));
 
+function processingAnim(){
+  if(COUNTER == 0) {
+    console.log("  . processing .  ");
+    COUNTER ++;
+  } else if(COUNTER == 1) {
+    console.log(" .. processing .. ");
+    COUNTER ++;
+  } else if(COUNTER == 2){
+    console.log("... processing ...");
+    COUNTER ++;
+  } else {
+    console.log(" .. processing .. ");
+    COUNTER = 0;
+  }
+}
+
 function getCategoryItems(categoryName) {
 	categoryName = categoryName.slice(9, categoryName.length);
 	return new Promise((resolve, reject) => {
-		unirest.get(`https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmlimit=500&format=json&cmtitle=Category:${categoryName}`).end(function (response) {
+    unirest.get(`https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmlimit=500&format=json&cmtitle=Category:${categoryName}`)
+    .end(function (response) {
 			let categoryMembers = [];
 			if(response && response.body && response.body.query && 
 				response.body.query.categorymembers) {
@@ -31,8 +51,10 @@ function getCategoryItems(categoryName) {
 				} else {
 					pages.push(categoryMembers[i]);
 				}
-			}
+      }
 
+      processingAnim();
+      
 			resolve(
 				{
 					subCategories: categories,
@@ -44,40 +66,95 @@ function getCategoryItems(categoryName) {
 	});
 }
 
-getCategoriesPageCount([{title:"Category:Artificial intelligence"}], 2)
-	.then(pageCount => {
-    console.log(pageCount);
-    console.log("finished.");
-  });
+function doesContain(checkPage, pageLst) {
+  for(var idx in pageLst) {
+    if(checkPage.title == pageLst[idx].title) {
+      return true;
+    }
+  }
+  return false;
+}
 
-function getCategoriesPageCount(categories, depth) {
+function filterPages(pages) {
+  let newPages = [];
+  for(var idx in pages) {
+    if(!doesContain(pages[idx], newPages)) {
+      newPages.push({
+        title: pages[idx].title,
+        pageid: pages[idx].pageid
+      });
+    }
+  }
+  return newPages;
+}
+
+
+function mainCall() {
+  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 4)
+	.then(allPages => {
+    console.log("finished.");
+    console.log("--------------------");
+    console.log(`NUM PAGES: ${allPages.length}`);
+
+    setTimeout(function() {
+      const filteredPages = filterPages(allPages);
+      console.log(`NUM PAGES (verified): ${filteredPages.length}`);
+    }, 1000);
+    
+  });
+}
+
+// UNCOMMENT THIS TO RUN
+//mainCall();
+
+// wtf_wikipedia node module <-- WAY BETTER
+wtf.from_api("Artificial intelligence", "en", function(markup){
+  var text= wtf.plaintext(markup)
+  // "The Toronto Blue Jays are a Canadian professional baseball team..."
+  console.log(text);
+});
+
+// My content extract attempt
+// var queryString = `https://en.wikipedia.org/w/api.php?action=query&`+
+// `prop=revisions&rvprop=content&rvparse&rvsection=0&format=json`+
+// `&titles=${"Artificial intelligence"}`;
+// unirest.get(queryString)
+// .end(function (response) {
+//   let pages = response.body.query.pages;
+//   let html = "";
+//   for(var id in pages) {
+//     html = pages[id].revisions[0]["*"];
+//   }
+//   let text = htmlToText.fromString(html);
+//   console.log(html.length);
+//   console.log(text.length);
+//   console.log(text);
+// });
+
+function getAllPages(categories, depth) {
 	return new Promise(resolve => {
 		if(depth <= 0 || categories.length <= 0) {
 			//console.log("depth reached");
-			resolve(0);
+			resolve([]);
 		} else {
 			// traverse each category
-			let fullPageCount = 0;
+			let allPages = [];
 			let callCount = 0;
 			for(var i=0; i < categories.length; i++) {
 				getCategoryItems(categories[i].title).then(obj => {
 
-					// increment page count
-					getCategoriesPageCount(obj.subCategories, depth-1)
-						.then(subPageCount => {
-							callCount ++;
-              fullPageCount += (subPageCount + obj.pageCount);
-              wikiData = require('./data.json');
-              wikiData.concat(obj.pages);
-              fs.writeFile('data.json', JSON.stringify(wikiData), 'utf8', ()=>{});
-
-							if(callCount == categories.length) {
-								resolve(fullPageCount);
-							}
-						});
-				});
+          // increment page count
+          getAllPages(obj.subCategories, depth-1)
+            .then(subPages => {
+              callCount ++;
+              allPages = allPages.concat(obj.pages);
+              allPages = allPages.concat(subPages);
+              if(callCount == categories.length) {
+                resolve(allPages);
+              }
+            });
+        });
 			}
-			
 		}
 	});
 }
