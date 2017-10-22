@@ -94,50 +94,6 @@ function filterPages(pages) {
   return newPages;
 }
 
-
-function mainCall() {
-  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 4)
-	.then(allPages => {
-    console.log("finished.");
-    console.log("--------------------");
-    console.log(`NUM PAGES: ${allPages.length}`);
-
-    setTimeout(function() {
-      const filteredPages = filterPages(allPages);
-      console.log(`NUM PAGES (verified): ${filteredPages.length}`);
-    }, 1000);
-    
-  });
-}
-
-// UNCOMMENT THIS TO RUN
-//mainCall();
-
-// wtf_wikipedia node module <-- WAY BETTER
-wtf.from_api("Artificial intelligence", "en", function(markup){
-  var text= wtf.plaintext(markup)
-  // "The Toronto Blue Jays are a Canadian professional baseball team..."
-  console.log("---------- CHARACTERISTICS ----------");
-  console.log(`word count: ${wordcount(text)}`);
-  wordpos.getPOS(text, obj => {
-    console.log(`noun count: ${obj.nouns.length}`);
-    console.log(`verb count: ${obj.verbs.length}`);
-    console.log(`adjective count: ${obj.adjectives.length}`);
-    console.log(`adverb count: ${obj.adverbs.length}`);
-    console.log(`rest count: ${obj.rest.length}`);
-  });
-  const textSentiment = sentiment(text);
-  console.log(`sentiment score: ${textSentiment.score}`);
-  console.log(`sentiment comparative: ${textSentiment.comparative}`);
-  emotional.load(function() {
-    const textEmotion = emotional.get(text);
-    console.log(`polarity: ${textEmotion.polarity}`);
-    console.log(`subjectivity: ${textEmotion.subjectivity}`);
-    const textPositive = emotional.positive(text)? "yes": "no";
-    console.log(`positive?: ${textPositive}`);
-  });
-});
-
 function parseTimestamp(timestamp) {
   let timeDate = timestamp.split("T");
   let date = timeDate[0].split("-");
@@ -161,28 +117,90 @@ function parseTimestamp(timestamp) {
   return ret;
 }
 
-nodeWiki.revisions.all("Artificial intelligence", { comment: false }, function(response) {
-  // info on each revision made to Miles Davis' page
-  const parsed = parseTimestamp(response[response.length-1].timestamp);
-  console.log(`creation date: ${parsed.pretty}`);
-});
+function mainCall() {
+  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 2)
+	.then(allPages => {
+    console.log("finished.");
+    console.log("--------------------");
+    console.log(`NUM PAGES: ${allPages.length}`);
 
-// My content extract attempt
-// var queryString = `https://en.wikipedia.org/w/api.php?action=query&`+
-// `prop=revisions&rvprop=content&rvparse&rvsection=0&format=json`+
-// `&titles=${"Artificial intelligence"}`;
-// unirest.get(queryString)
-// .end(function (response) {
-//   let pages = response.body.query.pages;
-//   let html = "";
-//   for(var id in pages) {
-//     html = pages[id].revisions[0]["*"];
-//   }
-//   let text = htmlToText.fromString(html);
-//   console.log(html.length);
-//   console.log(text.length);
-//   console.log(text);
-// });
+    setTimeout(function() {
+      const filteredPages = filterPages(allPages);
+      console.log(`NUM PAGES (verified): ${filteredPages.length}`);
+    }, 1000);
+    
+  });
+}
+
+function getCreationDate(pageTitle) {
+  return new Promise(resolve => {
+    unirest.get(`https://en.wikipedia.org/w/api.php?`+
+    `action=query&prop=revisions&rvlimit=1&rvprop=timestamp&`+
+    `rvdir=newer&format=json&titles=${pageTitle}`)
+    .end(function (response) {
+      s0ts = "2000-01-01T14:10:17Z";
+      if(response.body && response.body.query && response.body.query.pages) {
+        let pages = response.body.query.pages;
+        for(idx in pages) {
+          if(pages[idx].revisions && pages[idx].revisions[0] &&
+              pages[idx].revisions[0].timestamp) {
+            resolve(parseTimestamp(pages[idx].revisions[0].timestamp));
+          }
+        }
+      }
+      resolve(parseTimestamp(s0ts));
+    });
+  });
+}
+
+function getRatio(pages) {
+  let stratum = {s0:0, s1:0, s2:0, s3:0, s4:0};
+
+  if(parsed.year < 2001) {
+    stratum.s0 ++;
+  } else if(parsed.year <= 2006) {
+    stratum.s1 ++;
+  } else if(parsed.year <= 2010) {
+    stratum.s2 ++;
+  } else if(parsed.year <= 2014) {
+    stratum.s3 ++;
+  } else { //parsed.year <= 2017
+    stratum.s4 ++;
+  }
+}
+
+
+// UNCOMMENT THIS TO RUN
+//mainCall();
+
+getCreationDate("Artificial intelligence").then(ts => {console.log(ts)});
+
+// wtf_wikipedia node module <-- WAY BETTER
+function doAnalysis() {
+  wtf.from_api("Artificial intelligence", "en", function(markup){
+    var text= wtf.plaintext(markup)
+    // "The Toronto Blue Jays are a Canadian professional baseball team..."
+    console.log("---------- CHARACTERISTICS ----------");
+    console.log(`word count: ${wordcount(text)}`);
+    wordpos.getPOS(text, obj => {
+      console.log(`noun count: ${obj.nouns.length}`);
+      console.log(`verb count: ${obj.verbs.length}`);
+      console.log(`adjective count: ${obj.adjectives.length}`);
+      console.log(`adverb count: ${obj.adverbs.length}`);
+      console.log(`rest count: ${obj.rest.length}`);
+    });
+    const textSentiment = sentiment(text);
+    console.log(`sentiment score: ${textSentiment.score}`);
+    console.log(`sentiment comparative: ${textSentiment.comparative}`);
+    emotional.load(function() {
+      const textEmotion = emotional.get(text);
+      console.log(`polarity: ${textEmotion.polarity}`);
+      console.log(`subjectivity: ${textEmotion.subjectivity}`);
+      const textPositive = emotional.positive(text)? "yes": "no";
+      console.log(`positive?: ${textPositive}`);
+    });
+  });
+}
 
 function getAllPages(categories, depth) {
 	return new Promise(resolve => {
