@@ -12,6 +12,7 @@ var WordPOS = require('wordpos'),
     wordpos = new WordPOS();
 var fs = require('fs');
 var COUNTER = 0;
+var COUNTER2 = 0;
 
 require('dotenv').config()
 var app = express();
@@ -118,7 +119,7 @@ function parseTimestamp(timestamp) {
 }
 
 function mainCall() {
-  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 4)
+  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 2)
 	.then(allPages => {
     console.log("finished.");
     console.log("--------------------");
@@ -133,11 +134,13 @@ function mainCall() {
   });
 }
 
+var failed = [];
+
 function getCreationDate(pageTitle) {
   return new Promise(resolve => {
     unirest.get(`https://en.wikipedia.org/w/api.php?`+
     `action=query&prop=revisions&rvlimit=1&rvprop=timestamp&`+
-    `rvdir=newer&format=json&titles=${pageTitle}`)
+    `rvdir=newer&format=json&titles=${encodeURI(pageTitle)}`)
     .end(function (response) {
       s0ts = "2000-01-01T14:10:17Z";
       if(response.body && response.body.query && response.body.query.pages) {
@@ -145,41 +148,73 @@ function getCreationDate(pageTitle) {
         for(idx in pages) {
           if(pages[idx].revisions && pages[idx].revisions[0] &&
               pages[idx].revisions[0].timestamp) {
-            resolve(parseTimestamp(pages[idx].revisions[0].timestamp));
-            console.log(stratum);
+            let ret = parseTimestamp(pages[idx].revisions[0].timestamp);
+            COUNTER2 ++;
+            console.log(`${COUNTER2}: ${ret.pretty}`);
+            resolve(ret);
+          } else {
+            COUNTER2 ++;
+            let ret3 = parseTimestamp(s0ts);
+            console.log(`${COUNTER2}: ${ret3.pretty} : ${pageTitle}`);
+            resolve(ret3);
           }
+          break;
         }
+      } else {
+        COUNTER2 ++;
+        let ret2 = parseTimestamp(s0ts);
+        console.log(`${COUNTER2}: ${ret2.pretty} : ${pageTitle}`);
+        resolve(ret2);
       }
-      resolve(parseTimestamp(s0ts));
     });
   });
 }
 
 
 var stratum = {s0:0, s1:0, s2:0, s3:0, s4:0};
+var promises = [];
 
 function getRatio(pages) {
   //recursiveLoop(pages, pages.length-1);
-  for(var idx in pages) {
-    getCreationDate(pages[idx].title).then(parsed => {
-      if(parsed.year < 2001) {
-        stratum.s0 ++;
-      } else if(parsed.year <= 2006) {
-        stratum.s1 ++;
-      } else if(parsed.year <= 2010) {
-        stratum.s2 ++;
-      } else if(parsed.year <= 2014) {
-        stratum.s3 ++;
-      } else { // i.e. parsed.year <= 2017
-        stratum.s4 ++;
-      }
+  // for(var idx in pages) {
+  //   promises.push(getCreationDate(pages[idx].title));
+  // }
+  let counter = pages.length-1;
+  let interval = setInterval(function() {
+    promises.push(getCreationDate(pages[counter].title));
+    counter--;
+    if(counter < 0) {
+      clearInterval(interval);
+      stratify();
+    }
+  }, 100);
+  function stratify() {
+    Promise.all(promises)
+    .then(data => {
+      data.forEach((parsed, idx) => {
+        if(parsed.year < 2001) {
+          stratum.s0 ++;
+        } else if(parsed.year <= 2006) {
+          stratum.s1 ++;
+        } else if(parsed.year <= 2010) {
+          stratum.s2 ++;
+        } else if(parsed.year <= 2014) {
+          stratum.s3 ++;
+        } else { // i.e. parsed.year <= 2017
+          stratum.s4 ++;
+        }
+      });
+      console.log("----------- END -------------");
+      console.log(stratum);
     });
   }
+  
 }
 
 
 // UNCOMMENT THIS TO RUN
 mainCall();
+//getCreationDate("ACT-R").then(ts => {console.log(ts)});
 
 // wtf_wikipedia node module <-- WAY BETTER
 function doAnalysis() {
