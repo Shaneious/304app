@@ -161,7 +161,7 @@ function parseTimestamp(timestamp) {
   return ret;
 }
 
-nodeWiki.revisions.all("42", { comment: false }, function(response) {
+nodeWiki.revisions.all("Artificial intelligence", { comment: false }, function(response) {
   // info on each revision made to Miles Davis' page
   const parsed = parseTimestamp(response[response.length-1].timestamp);
   console.log(`creation date: ${parsed.pretty}`);
