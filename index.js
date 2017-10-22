@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var wikiData = require('./data.json');
 var htmlToText = require('html-to-text');
 var wtf = require('wtf_wikipedia');
+var nodeWiki = require('node-wikipedia');
 var sentiment = require('sentiment');
 var emotional = require('emotional');
 var wordcount = require('word-count');
@@ -135,6 +136,35 @@ wtf.from_api("Artificial intelligence", "en", function(markup){
     const textPositive = emotional.positive(text)? "yes": "no";
     console.log(`positive?: ${textPositive}`);
   });
+});
+
+function parseTimestamp(timestamp) {
+  let timeDate = timestamp.split("T");
+  let date = timeDate[0].split("-");
+  let time = timeDate[1].split(":");
+  let hour = parseInt(time[0]);
+  let oldHour = hour;
+  let period = "";
+  if((hour-12) < 0) {
+    period = "am";
+  } else {
+    hour = (hour-12);
+    period = "pm";
+  }
+  const ret = {
+    year: parseInt(date[0]), month: parseInt(date[1]), day: parseInt(date[2]),
+    hour: hour, period: period, minute: parseInt(time[1]), "24hour": oldHour,
+    second: time[2], pretty: `${date[2]}/${date[1]}/`+
+            `${date[0]} @ ${hour}:${time[1]}:${time[2].slice(0,2)}`+
+            `${period}`
+  }
+  return ret;
+}
+
+nodeWiki.revisions.all("42", { comment: false }, function(response) {
+  // info on each revision made to Miles Davis' page
+  const parsed = parseTimestamp(response[response.length-1].timestamp);
+  console.log(`creation date: ${parsed.pretty}`);
 });
 
 // My content extract attempt
