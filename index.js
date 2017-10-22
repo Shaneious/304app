@@ -4,6 +4,11 @@ var bodyParser = require('body-parser');
 var wikiData = require('./data.json');
 var htmlToText = require('html-to-text');
 var wtf = require('wtf_wikipedia');
+var sentiment = require('sentiment');
+var emotional = require('emotional');
+var wordcount = require('word-count');
+var WordPOS = require('wordpos'),
+    wordpos = new WordPOS();
 var fs = require('fs');
 var COUNTER = 0;
 
@@ -111,7 +116,25 @@ function mainCall() {
 wtf.from_api("Artificial intelligence", "en", function(markup){
   var text= wtf.plaintext(markup)
   // "The Toronto Blue Jays are a Canadian professional baseball team..."
-  console.log(text);
+  console.log("---------- CHARACTERISTICS ----------");
+  console.log(`word count: ${wordcount(text)}`);
+  wordpos.getPOS(text, obj => {
+    console.log(`noun count: ${obj.nouns.length}`);
+    console.log(`verb count: ${obj.verbs.length}`);
+    console.log(`adjective count: ${obj.adjectives.length}`);
+    console.log(`adverb count: ${obj.adverbs.length}`);
+    console.log(`rest count: ${obj.rest.length}`);
+  });
+  const textSentiment = sentiment(text);
+  console.log(`sentiment score: ${textSentiment.score}`);
+  console.log(`sentiment comparative: ${textSentiment.comparative}`);
+  emotional.load(function() {
+    const textEmotion = emotional.get(text);
+    console.log(`polarity: ${textEmotion.polarity}`);
+    console.log(`subjectivity: ${textEmotion.subjectivity}`);
+    const textPositive = emotional.positive(text)? "yes": "no";
+    console.log(`positive?: ${textPositive}`);
+  });
 });
 
 // My content extract attempt

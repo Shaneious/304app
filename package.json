@@ -12,10 +12,14 @@
     "after-load": "^1.0.4",
     "body-parser": "^1.18.2",
     "dotenv": "^4.0.0",
+    "emotional": "0.0.3",
     "express": "^4.15.5",
     "google-spreadsheet": "^2.0.4",
     "html-to-text": "^3.3.0",
+    "sentiment": "^4.1.0",
     "unirest": "^0.5.1",
+    "word-count": "^0.2.2",
+    "wordpos": "^1.1.5",
     "wtf_wikipedia": "^2.1.0"
   }
 }
