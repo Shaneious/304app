@@ -118,7 +118,7 @@ function parseTimestamp(timestamp) {
 }
 
 function mainCall() {
-  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 2)
+  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 4)
 	.then(allPages => {
     console.log("finished.");
     console.log("--------------------");
@@ -127,6 +127,7 @@ function mainCall() {
     setTimeout(function() {
       const filteredPages = filterPages(allPages);
       console.log(`NUM PAGES (verified): ${filteredPages.length}`);
+      getRatio(filteredPages);
     }, 1000);
     
   });
@@ -145,6 +146,7 @@ function getCreationDate(pageTitle) {
           if(pages[idx].revisions && pages[idx].revisions[0] &&
               pages[idx].revisions[0].timestamp) {
             resolve(parseTimestamp(pages[idx].revisions[0].timestamp));
+            console.log(stratum);
           }
         }
       }
@@ -153,27 +155,31 @@ function getCreationDate(pageTitle) {
   });
 }
 
-function getRatio(pages) {
-  let stratum = {s0:0, s1:0, s2:0, s3:0, s4:0};
 
-  if(parsed.year < 2001) {
-    stratum.s0 ++;
-  } else if(parsed.year <= 2006) {
-    stratum.s1 ++;
-  } else if(parsed.year <= 2010) {
-    stratum.s2 ++;
-  } else if(parsed.year <= 2014) {
-    stratum.s3 ++;
-  } else { //parsed.year <= 2017
-    stratum.s4 ++;
+var stratum = {s0:0, s1:0, s2:0, s3:0, s4:0};
+
+function getRatio(pages) {
+  //recursiveLoop(pages, pages.length-1);
+  for(var idx in pages) {
+    getCreationDate(pages[idx].title).then(parsed => {
+      if(parsed.year < 2001) {
+        stratum.s0 ++;
+      } else if(parsed.year <= 2006) {
+        stratum.s1 ++;
+      } else if(parsed.year <= 2010) {
+        stratum.s2 ++;
+      } else if(parsed.year <= 2014) {
+        stratum.s3 ++;
+      } else { // i.e. parsed.year <= 2017
+        stratum.s4 ++;
+      }
+    });
   }
 }
 
 
 // UNCOMMENT THIS TO RUN
-//mainCall();
-
-getCreationDate("Artificial intelligence").then(ts => {console.log(ts)});
+mainCall();
 
 // wtf_wikipedia node module <-- WAY BETTER
 function doAnalysis() {
