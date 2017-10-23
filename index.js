@@ -119,7 +119,7 @@ function parseTimestamp(timestamp) {
 }
 
 function mainCall() {
-  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 2)
+  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 4)
 	.then(allPages => {
     console.log("finished.");
     console.log("--------------------");
@@ -138,9 +138,13 @@ var failed = [];
 
 function getCreationDate(pageTitle) {
   return new Promise(resolve => {
+    const escaped = encodeURI(pageTitle).replace("&", "%26");
+    // console.log(escaped);
+    // console.log(encodeURI(pageTitle));
+    // console.log(escape(pageTitle));
     unirest.get(`https://en.wikipedia.org/w/api.php?`+
     `action=query&prop=revisions&rvlimit=1&rvprop=timestamp&`+
-    `rvdir=newer&format=json&titles=${encodeURI(pageTitle)}`)
+    `rvdir=newer&format=json&titles=${escaped}`)
     .end(function (response) {
       s0ts = "2000-01-01T14:10:17Z";
       if(response.body && response.body.query && response.body.query.pages) {
@@ -214,7 +218,8 @@ function getRatio(pages) {
 
 // UNCOMMENT THIS TO RUN
 mainCall();
-//getCreationDate("ACT-R").then(ts => {console.log(ts)});
+// getCreationDate("And–or tree").then(ts => {console.log(ts.pretty)});
+// getCreationDate("NDC Netzler & Dahlgren Co AB").then(ts => {console.log(ts.pretty)})
 
 // wtf_wikipedia node module <-- WAY BETTER
 function doAnalysis() {
