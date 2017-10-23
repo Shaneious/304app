@@ -136,12 +136,15 @@ function mainCall() {
 
 var failed = [];
 
+String.prototype.replaceAll = function(search, replacement) {
+  var target = this;
+  return target.split(search).join(replacement);
+};
+
 function getCreationDate(pageTitle) {
   return new Promise(resolve => {
-    const escaped = encodeURI(pageTitle).replace("&", "%26");
-    // console.log(escaped);
-    // console.log(encodeURI(pageTitle));
-    // console.log(escape(pageTitle));
+    let escaped = encodeURI(pageTitle).replaceAll("&", "%26")
+                                        .replaceAll("+","%2B");
     unirest.get(`https://en.wikipedia.org/w/api.php?`+
     `action=query&prop=revisions&rvlimit=1&rvprop=timestamp&`+
     `rvdir=newer&format=json&titles=${escaped}`)
@@ -160,6 +163,7 @@ function getCreationDate(pageTitle) {
             COUNTER2 ++;
             let ret3 = parseTimestamp(s0ts);
             console.log(`${COUNTER2}: ${ret3.pretty} : ${pageTitle}`);
+            failed.push(pageTitle);
             resolve(ret3);
           }
           break;
@@ -168,6 +172,7 @@ function getCreationDate(pageTitle) {
         COUNTER2 ++;
         let ret2 = parseTimestamp(s0ts);
         console.log(`${COUNTER2}: ${ret2.pretty} : ${pageTitle}`);
+        failed.push(pageTitle);
         resolve(ret2);
       }
     });
@@ -191,7 +196,7 @@ function getRatio(pages) {
       clearInterval(interval);
       stratify();
     }
-  }, 100);
+  }, 50);
   function stratify() {
     Promise.all(promises)
     .then(data => {
@@ -210,6 +215,10 @@ function getRatio(pages) {
       });
       console.log("----------- END -------------");
       console.log(stratum);
+      console.log("-------------\nfailed:\n---------------");
+      failed.forEach((value,idx) => {
+        console.log(value);
+      });
     });
   }
   
@@ -220,8 +229,8 @@ function getRatio(pages) {
 mainCall();
 // getCreationDate("And–or tree").then(ts => {console.log(ts.pretty)});
 // getCreationDate("NDC Netzler & Dahlgren Co AB").then(ts => {console.log(ts.pretty)})
+// getCreationDate("Nektar++").then(ts => {console.log(ts.pretty)})
 
-// wtf_wikipedia node module <-- WAY BETTER
 function doAnalysis() {
   wtf.from_api("Artificial intelligence", "en", function(markup){
     var text= wtf.plaintext(markup)
