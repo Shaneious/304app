@@ -95,7 +95,7 @@ function filterPages(pages) {
   return newPages;
 }
 
-function parseTimestamp(timestamp) {
+function parseTimestamp(timestamp, pageTitle) {
   let timeDate = timestamp.split("T");
   let date = timeDate[0].split("-");
   let time = timeDate[1].split(":");
@@ -113,13 +113,14 @@ function parseTimestamp(timestamp) {
     hour: hour, period: period, minute: parseInt(time[1]), "24hour": oldHour,
     second: time[2], pretty: `${date[2]}/${date[1]}/`+
             `${date[0]} @ ${hour}:${time[1]}:${time[2].slice(0,2)}`+
-            `${period}`
+            `${period}`,
+    title: pageTitle
   }
   return ret;
 }
 
 function mainCall() {
-  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 4)
+  getAllPages([{pageid: 1, title:"Category:Artificial intelligence"}], 1)
 	.then(allPages => {
     console.log("finished.");
     console.log("--------------------");
@@ -128,7 +129,7 @@ function mainCall() {
     setTimeout(function() {
       const filteredPages = filterPages(allPages);
       console.log(`NUM PAGES (verified): ${filteredPages.length}`);
-      getRatio(filteredPages);
+      getRatio(filteredPages.slice(0,10));
     }, 1000);
     
   });
@@ -141,10 +142,15 @@ String.prototype.replaceAll = function(search, replacement) {
   return target.split(search).join(replacement);
 };
 
+function myEscape(pageTitle) {
+  return encodeURI(pageTitle).replaceAll("&", "%26")
+                              .replaceAll("+","%2B");
+}
+
 function getCreationDate(pageTitle) {
   return new Promise(resolve => {
-    let escaped = encodeURI(pageTitle).replaceAll("&", "%26")
-                                        .replaceAll("+","%2B");
+    let escaped = myEscape(pageTitle);
+
     unirest.get(`https://en.wikipedia.org/w/api.php?`+
     `action=query&prop=revisions&rvlimit=1&rvprop=timestamp&`+
     `rvdir=newer&format=json&titles=${escaped}`)
@@ -155,13 +161,13 @@ function getCreationDate(pageTitle) {
         for(idx in pages) {
           if(pages[idx].revisions && pages[idx].revisions[0] &&
               pages[idx].revisions[0].timestamp) {
-            let ret = parseTimestamp(pages[idx].revisions[0].timestamp);
+            let ret = parseTimestamp(pages[idx].revisions[0].timestamp, pageTitle);
             COUNTER2 ++;
             console.log(`${COUNTER2}: ${ret.pretty}`);
             resolve(ret);
           } else {
             COUNTER2 ++;
-            let ret3 = parseTimestamp(s0ts);
+            let ret3 = parseTimestamp(s0ts, pageTitle);
             console.log(`${COUNTER2}: ${ret3.pretty} : ${pageTitle}`);
             failed.push(pageTitle);
             resolve(ret3);
@@ -170,7 +176,7 @@ function getCreationDate(pageTitle) {
         }
       } else {
         COUNTER2 ++;
-        let ret2 = parseTimestamp(s0ts);
+        let ret2 = parseTimestamp(s0ts, pageTitle);
         console.log(`${COUNTER2}: ${ret2.pretty} : ${pageTitle}`);
         failed.push(pageTitle);
         resolve(ret2);
@@ -181,6 +187,7 @@ function getCreationDate(pageTitle) {
 
 
 var stratum = {s0:0, s1:0, s2:0, s3:0, s4:0};
+var strata = {s0:[], s1:[], s2:[], s3:[], s4:[]};
 var promises = [];
 
 function getRatio(pages) {
@@ -203,14 +210,20 @@ function getRatio(pages) {
       data.forEach((parsed, idx) => {
         if(parsed.year < 2001) {
           stratum.s0 ++;
-        } else if(parsed.year <= 2006) {
-          stratum.s1 ++;
-        } else if(parsed.year <= 2010) {
-          stratum.s2 ++;
-        } else if(parsed.year <= 2014) {
-          stratum.s3 ++;
+        } else if(parsed.year <= 2004) {
+          stratum.s1 ++; stratum.s2 ++;
+          stratum.s3 ++; stratum.s4 ++;
+          strata.s1.push(parsed.title);
+        } else if(parsed.year <= 2008) {
+          stratum.s2 ++; stratum.s3 ++;
+          stratum.s4 ++;
+          strata.s2.push(parsed.title);
+        } else if(parsed.year <= 2012) {
+          stratum.s3 ++; stratum.s4 ++;
+          strata.s3.push(pageTitle);
         } else { // i.e. parsed.year <= 2017
           stratum.s4 ++;
+          strata.s4.push(pageTitle);
         }
       });
       console.log("----------- END -------------");
@@ -221,7 +234,6 @@ function getRatio(pages) {
       });
     });
   }
-  
 }
 
 
@@ -231,9 +243,29 @@ mainCall();
 // getCreationDate("NDC Netzler & Dahlgren Co AB").then(ts => {console.log(ts.pretty)})
 // getCreationDate("Nektar++").then(ts => {console.log(ts.pretty)})
 
+function doAnalysis2(pageTitle, year) {
+  url = `https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvlimit=1`+
+  `&rvprop=content&rvdir=newer&rvstart=${year}-01-01T00:00:00Z&format=json&`+
+  `titles=${myEscape(pageTitle)}`;
+
+  unirest.get(url).end(function(response) {
+
+    let wikipages = response.body.query.pages;
+    let wikitext = "";
+    for(var idx in wikipages) {
+      wikitext = wikipages[idx].revisions[0]["*"];
+      break;
+    }
+    let text = wtf.plaintext(wikitext);
+    console.log(text);
+  });
+}
+
 function doAnalysis() {
   wtf.from_api("Artificial intelligence", "en", function(markup){
     var text= wtf.plaintext(markup)
+    console.log(text);
+    return;
     // "The Toronto Blue Jays are a Canadian professional baseball team..."
     console.log("---------- CHARACTERISTICS ----------");
     console.log(`word count: ${wordcount(text)}`);
