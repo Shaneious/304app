@@ -11,9 +11,11 @@ var fetch = require('./fetch');
 function Analyze() {
     this.doAnalysis = function(pageTitle, year) {
         return new Promise(resolve => {
-        utils.startAnim("analyzing", 50);
+        // utils.startAnim("analyzing", 50);
         fetch.fetchText(pageTitle, year).then(text => {
             let ret = {};
+            ret["title"] = pageTitle;
+            ret["year"] = year;
             ret["wordcount"] = wordcount(text);
             wordpos.getPOS(text, obj => {
                 ret["numNouns"] = obj.nouns.length;
@@ -29,8 +31,8 @@ function Analyze() {
                     ret["polarity"] = textEmotion.polarity;
                     ret["subjectivity"] = textEmotion.subjectivity;
                     const textPositive = emotional.positive(text);
-                    ret["positive?"] = textPositive;
-                    utils.stopAnim();
+                    ret["positive"] = textPositive;
+                    // utils.stopAnim();
                     resolve(ret);
                 });
             });

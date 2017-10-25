@@ -137,7 +137,7 @@ function Fetch() {
                     } else if(parsed.year <= 2012) {
                         stratum.s3 ++;
                         strata.s3.push(parsed.title);
-                    } else { // i.e. parsed.year <= 2017
+                    } else if(parsed.year <= 2016) {
                         stratum.s4 ++;
                         strata.s4.push(parsed.title);
                     }
