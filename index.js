@@ -34,7 +34,7 @@ function getAnalysis(strata){
       for (index in strata[stratum]){
         var i = 5 - parseInt(stratum[1]);
         while (i > 0){
-          var year = 2001 + (i*4);
+          var year = 2000 + (i*4);
           promises.push(analyze.doAnalysis(strata[stratum][index], year));
           i--;
         }
@@ -50,30 +50,20 @@ function writeJSON(strata){
     remaining: [], sentiment: [], comparative: [], polarity: [], subjectivity: [], positive: [] 
   }
 
-  console.log("Creating JSON document...");
+  utils.startAnim("Creating JSON Document",50);
   getAnalysis(strata)
   .then(promises=>{
     Promise.all(promises)
     .then(data=>{
       for (index in data){
-        aiPages.title.push(data[index].title);
-        aiPages.year.push(data[index].year);
-        aiPages.wordcount.push(data[index].wordcount);
-        aiPages.numNouns.push(data[index].numNouns);
-        aiPages.numverbs.push(data[index].numverbs);
-        aiPages.numAdjectives.push(data[index].numAdjectives);
-        aiPages.numAdverbs.push(data[index].numAdverbs);
-        aiPages.remaining.push(data[index].remaining);
-        aiPages.sentiment.push(data[index].sentiment);
-        aiPages.comparative.push(data[index].comparative);
-        aiPages.polarity.push(data[index].polarity);
-        aiPages.subjectivity.push(data[index].subjectivity);
-        aiPages.positive.push(data[index].positive);
+        for (characteristic in aiPages){
+          aiPages[characteristic].push(data[index][characteristic]);
+        }
       }
 
       var jsonData =  JSON.stringify(aiPages);
       fs.writeFile('data.json', jsonData, 'utf8',()=>{});
-      console.log("JSON document Completed")
+      utils.stopAnim();
     });
   });
 }
