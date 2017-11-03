@@ -25,7 +25,7 @@ function mainCall() {
   });
 }
 
-
+//analyze.doAnalysis("Artificial intelligence",2016);
 function getAnalysis(strata){
   let promises = [];
   return new Promise(resolve=>{
@@ -46,7 +46,8 @@ function getAnalysis(strata){
 
 function writeJSON(strata){
   let aiPages = {
-    title: [], year: [], wordcount: [], numNouns: [], numverbs: [], numAdjectives: [], numAdverbs: [],
+    title: [], year: [], wordcount: [], numNouns: [], numUniqueNouns: [], numVerbs: [], 
+    numUniqueVerbs: [], numAdjectives: [], numUniqueAdjectives: [], numAdverbs: [], numUniqueAdverbs:[],
     remaining: [], sentiment: [], comparative: [], polarity: [], subjectivity: [], positive: [] 
   }
 

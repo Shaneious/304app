@@ -7,6 +7,7 @@ var WordPOS = require('wordpos'),
     wordpos = new WordPOS();
 var utils = require('./utils');
 var fetch = require('./fetch');
+var regex = require('word-regex')();
 
 function Analyze() {
     this.doAnalysis = function(pageTitle, year) {
@@ -18,11 +19,28 @@ function Analyze() {
             ret["year"] = year;
             ret["wordcount"] = wordcount(text);
             wordpos.getPOS(text, obj => {
-                ret["numNouns"] = obj.nouns.length;
-                ret["numverbs"] = obj.verbs.length;
-                ret["numAdjectives"] = obj.adjectives.length;
-                ret["numAdverbs"] = obj.adverbs.length;
+                wordList = getWordList(text);
+                
+                /* Noun Counts*/
+                ret["numNouns"] = duplicateCount(wordList,obj.nouns);
+                ret["numUniqueNouns"] = obj.nouns.length;
+
+                /* Verb Counts*/
+                ret["numVerbs"] = duplicateCount(wordList,obj.verbs);
+                ret["numUniqueVerbs"] = obj.verbs.length;
+
+                /* Ajective Counts*/
+                ret["numAdjectives"] = duplicateCount(wordList,obj.adjectives);
+                ret["numUniqueAdjectives"] = obj.adjectives.length;
+
+                /* Adverb Counts*/
+                ret["numAdverbs"] = duplicateCount(wordList,obj.adverbs);
+                ret["numUniqueAdverbs"] = obj.adverbs.length;
+
+                /* Rest*/
                 ret["remaining"] = obj.rest.length;
+
+                /* Sentiments*/
                 const textSentiment = sentiment(text);
                 ret["sentiment"] = textSentiment.score;
                 ret["comparative"] = textSentiment.comparative;
@@ -35,11 +53,39 @@ function Analyze() {
                     // utils.stopAnim();
                     resolve(ret);
                 });
-            });
+            });         
         });
     });
-    }
+    } 
+}
+
+function getWordList(text){
+    words = text.match(regex);
+    wordList = {};
+
+    words.forEach((word)=>{
+        newWord = word.toLowerCase();
+
+        if (!wordList[newWord])
+            wordList[newWord] = 1;
+        else
+            wordList[newWord]++;
+    });
+
+    return wordList;
+}
+
+function duplicateCount(wordList, searchList){
+    count = 0;
+
+    searchList.forEach((word)=>{
+        word = word.toLowerCase();
+        count = count + wordList[word];
+    });
+    
+    return count;
 }
 
 var analyze = new Analyze();
 module.exports = analyze;
+
