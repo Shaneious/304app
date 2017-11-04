@@ -16,7 +16,7 @@ function mainCall() {
     setTimeout(function() {
       const filteredPages = utils.filterPages(allPages);
       console.log(`NUM PAGES (verified): ${filteredPages.length}`);
-      fetch.stratify(filteredPages.slice(0,10)).then(strata => {
+      fetch.stratify(filteredPages).then(strata => {
         console.log("These are the stratas");
         console.log(strata); // this is the strata (page titles, for use with analyze)
         writeJSON(strata);

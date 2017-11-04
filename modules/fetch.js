@@ -51,15 +51,30 @@ function Fetch() {
 
         return new Promise(resolve => {
             unirest.get(url).end(function(response) {
-        
-            let wikipages = response.body.query.pages;
+            
+            let wikipages = [];
+            try {
+                wikipages = response.body.query.pages;
+            } catch(e) {
+                resolve("");
+            }
+            
             let wikitext = "";
             for(var idx in wikipages) {
-                wikitext = wikipages[idx].revisions[0]["*"];
+                if(wikipages[idx] && wikipages[idx].revisions &&
+                    wikipages[idx].revisions[0] && 
+                    wikipages[idx].revisions[0]["*"]) {
+                        wikitext = wikipages[idx].revisions[0]["*"];
+                    }
                 break;
             }
-            let text = wtf.plaintext(wikitext);
-            resolve(text);
+            try {
+                let text = wtf.plaintext(wikitext);
+                resolve(text);
+            } catch(e) {
+                resolve("");
+            }
+            
             });
         });
       }
