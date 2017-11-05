@@ -106,7 +106,7 @@ function getProperties(wordList, searchList){
         word = word.toLowerCase();
         count = count + wordList[word];
 
-        if (commonCount < wordList[word]){
+        if (commonCount < wordList[word] && word.length>=4){
             commonWord = word;
             commonCount = wordList[word];
         }

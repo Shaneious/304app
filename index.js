@@ -6,7 +6,7 @@ var fs = require('fs');
 
 function mainCall() {
   utils.startAnim("fetching pages", 100);
-  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 2)
+  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 1)
 	.then(allPages => {
     utils.stopAnim();
     console.log("finished.");
