@@ -81,6 +81,23 @@ function Utils() {
         }
         return ret;
       }
+      
+    this.randomSamplePages = function(pages, sampleSize){
+      let newPages = [];
+
+      if (sampleSize > pages.length){
+        return pages;
+      }
+
+      while (sampleSize>0){
+        var randomnumber = Math.floor(Math.random()*pages.length);
+        if (!newPages.includes(pages[randomnumber])){
+          newPages.push(pages[randomnumber]);
+          sampleSize--;
+        }
+      }
+      return newPages;
+    }
 }
 
 var utils = new Utils();

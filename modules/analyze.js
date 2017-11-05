@@ -21,6 +21,10 @@ function Analyze() {
             wordpos.getPOS(text, obj => {
                 wordList = getWordList(text);
                 
+                /*handle null case*/
+                if (Object.keys(wordList).length <= 0)
+                    ret["nullCase"] = true;
+
                 /* Noun Counts*/
                 ret["numNouns"] = duplicateCount(wordList,obj.nouns);
                 ret["numUniqueNouns"] = obj.nouns.length;
@@ -63,14 +67,16 @@ function getWordList(text){
     words = text.match(regex);
     wordList = {};
 
-    words.forEach((word)=>{
-        newWord = word.toLowerCase();
+    if (words){
+        words.forEach((word)=>{
+            newWord = word.toLowerCase();
 
-        if (!wordList[newWord])
-            wordList[newWord] = 1;
-        else
-            wordList[newWord]++;
-    });
+            if (!wordList[newWord])
+                wordList[newWord] = 1;
+            else
+                wordList[newWord]++;
+        });
+    }
 
     return wordList;
 }

@@ -16,7 +16,11 @@ function mainCall() {
     setTimeout(function() {
       const filteredPages = utils.filterPages(allPages);
       console.log(`NUM PAGES (verified): ${filteredPages.length}`);
-      fetch.stratify(filteredPages).then(strata => {
+      
+      const sampledPages = utils.randomSamplePages(filteredPages,100);
+      console.log(`NUM SAMPLES PAGES: ${sampledPages.length}`);
+
+      fetch.stratify(sampledPages).then(strata => {
         console.log("These are the stratas");
         console.log(strata); // this is the strata (page titles, for use with analyze)
         writeJSON(strata);
@@ -57,6 +61,8 @@ function writeJSON(strata){
     Promise.all(promises)
     .then(data=>{
       for (index in data){
+        if (data[index]["nullCase"]) continue;
+
         for (characteristic in aiPages){
           aiPages[characteristic].push(data[index][characteristic]);
         }
