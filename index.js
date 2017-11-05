@@ -6,7 +6,7 @@ var fs = require('fs');
 
 function mainCall() {
   utils.startAnim("fetching pages", 100);
-  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 1)
+  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 2)
 	.then(allPages => {
     utils.stopAnim();
     console.log("finished.");
@@ -16,7 +16,7 @@ function mainCall() {
     setTimeout(function() {
       const filteredPages = utils.filterPages(allPages);
       console.log(`NUM PAGES (verified): ${filteredPages.length}`);
-      
+
       const sampledPages = utils.randomSamplePages(filteredPages,100);
       console.log(`NUM SAMPLES PAGES: ${sampledPages.length}`);
 
@@ -36,12 +36,15 @@ function getAnalysis(strata){
 
     for (stratum in strata){
       for (index in strata[stratum]){
-        var i = 5 - parseInt(stratum[1]);
+        var min = parseInt(stratum[1]); 
+        var year = 2000 + ((Math.floor(Math.random()*(5-min)) + min)*4);
+        promises.push(analyze.doAnalysis(strata[stratum][index], year));
+/*     var i = 5 - parseInt(stratum[1]);  
         while (i > 0){
           var year = 2000 + (i*4);
           promises.push(analyze.doAnalysis(strata[stratum][index], year));
           i--;
-        }
+        }*/
       }
     }
     resolve(promises); 
@@ -50,9 +53,10 @@ function getAnalysis(strata){
 
 function writeJSON(strata){
   let aiPages = {
-    title: [], year: [], wordcount: [], numNouns: [], numUniqueNouns: [], numVerbs: [], 
+    title: [], year: [], strata: [], wordcount: [], numNouns: [], numUniqueNouns: [], numVerbs: [], 
     numUniqueVerbs: [], numAdjectives: [], numUniqueAdjectives: [], numAdverbs: [], numUniqueAdverbs:[],
-    remaining: [], sentiment: [], comparative: [], polarity: [], subjectivity: [], positive: [] 
+    remaining: [], popularNoun: [], popularVerb: [], popularAdjective: [], popularAdverb: [],
+    popularWord: [], sentiment: [], comparative: [], polarity: [], subjectivity: [], positive: [] 
   }
 
   utils.startAnim("Creating JSON Document",50);

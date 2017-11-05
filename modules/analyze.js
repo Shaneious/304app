@@ -25,24 +25,39 @@ function Analyze() {
                 if (Object.keys(wordList).length <= 0)
                     ret["nullCase"] = true;
 
+                /*Strata*/
+                ret["strata"] = "S"+(year-2000)/4;
+
                 /* Noun Counts*/
-                ret["numNouns"] = duplicateCount(wordList,obj.nouns);
+                nounProperties = getProperties(wordList,obj.nouns);
+                ret["numNouns"] = nounProperties["count"];
                 ret["numUniqueNouns"] = obj.nouns.length;
+                ret["popularNoun"] = nounProperties["commonWord"];
 
                 /* Verb Counts*/
-                ret["numVerbs"] = duplicateCount(wordList,obj.verbs);
+                verbProperties = getProperties(wordList,obj.verbs);
+                ret["numVerbs"] = verbProperties["count"];
                 ret["numUniqueVerbs"] = obj.verbs.length;
+                ret["popularVerb"] = verbProperties["commonWord"];
 
                 /* Ajective Counts*/
-                ret["numAdjectives"] = duplicateCount(wordList,obj.adjectives);
+                adjectiveProperties = getProperties(wordList,obj.adjectives);
+                ret["numAdjectives"] = adjectiveProperties["count"];
                 ret["numUniqueAdjectives"] = obj.adjectives.length;
+                ret["popularAdjective"] = adjectiveProperties["commonWord"];
 
                 /* Adverb Counts*/
-                ret["numAdverbs"] = duplicateCount(wordList,obj.adverbs);
+                adverbProperties = getProperties(wordList,obj.adverbs)
+                ret["numAdverbs"] = adverbProperties["count"];
                 ret["numUniqueAdverbs"] = obj.adverbs.length;
+                ret["popularAdverb"] = adverbProperties["commonWord"];
 
                 /* Rest*/
                 ret["remaining"] = obj.rest.length;
+
+                /* Get most popular word*/
+                ret["popularWord"] = getPopular([nounProperties,verbProperties,
+                    adjectiveProperties,adverbProperties]);
 
                 /* Sentiments*/
                 const textSentiment = sentiment(text);
@@ -81,15 +96,39 @@ function getWordList(text){
     return wordList;
 }
 
-function duplicateCount(wordList, searchList){
+function getProperties(wordList, searchList){
+    properties = {};
+    commonWord = "";
+    commonCount = 0;
     count = 0;
 
     searchList.forEach((word)=>{
         word = word.toLowerCase();
         count = count + wordList[word];
+
+        if (commonCount < wordList[word]){
+            commonWord = word;
+            commonCount = wordList[word];
+        }
     });
     
-    return count;
+    properties["count"] = count;
+    properties["commonCount"] = commonCount;
+    properties["commonWord"] = commonWord;
+    return properties;
+}
+
+function getPopular(words){
+    popular = "";
+    count = 0;
+
+    words.forEach(word=>{
+        if (count < word["commonCount"]){     
+            count = word["commonCount"];
+            popular = word["commonWord"];
+        }
+    });
+    return popular;
 }
 
 var analyze = new Analyze();
