@@ -98,6 +98,74 @@ function Utils() {
       }
       return newPages;
     }
+
+    function containsObj(lst, obj) {
+      for (idx in lst) {
+        if(lst[idx].title == obj.title && lst[idx].year == obj.year) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function randomSelect(titles, size, givenYear) {
+      let revisions = [];
+
+      while(size > 0) {
+        randTitle = titles[Math.floor(Math.random()*titles.length)];
+
+        obj = {title: randTitle, year: givenYear};
+        if(!containsObj(revisions, obj)) {
+          revisions.push(obj);
+          size--;
+        }
+      }
+      return revisions;
+    }
+
+    this.randomRevisionsStratified = function(strata, sampleSize) {
+      let revisions = [];
+      let s1r = strata.s1.length;
+      let s2r = s1r + strata.s2.length;
+      let s3r = s2r + s1r + strata.s3.length;
+      let s4r = s3r + s2r + s1r + strata.s4.length;
+
+      let total = s1r + s2r + s3r + s4r;
+
+      let s1p = s1r / total;
+      let s2p = s2r / total;
+      let s3p = s3r / total;
+      let s4p = s4r / total;
+      
+      let s1Titles = strata.s1;
+      let s2Titles = strata.s2.concat(s1Titles);
+      let s3Titles = strata.s3.concat(s2Titles);
+      let s4Titles = strata.s4.concat(s3Titles);
+
+      revisions = revisions.concat(randomSelect(s1Titles, Math.round(sampleSize*s1p), 2004));
+      revisions = revisions.concat(randomSelect(s2Titles, Math.round(sampleSize*s2p), 2008));
+      revisions = revisions.concat(randomSelect(s3Titles, Math.round(sampleSize*s3p), 2012));
+      revisions = revisions.concat(randomSelect(s4Titles, Math.round(sampleSize*s4p), 2016));
+      return revisions;
+    }
+
+    this.randomRevisions = function(strata, sampleSize) {
+      let revisions = [];
+
+      while(sampleSize > 0) {
+        randStrataIdx = Math.floor(Math.random()*4)+1;
+        randStrata = "s" + randStrataIdx;
+        strataYear = 2000 + randStrataIdx*4;
+        randArticleIdx = Math.floor(Math.random()*strata[randStrata].length);
+
+        obj = {title: strata[randStrata][randArticleIdx], year: strataYear};
+        if(!containsObj(revisions, obj)) {
+          revisions.push(obj);
+          sampleSize--;
+        }
+      }
+      return revisions;
+    }
 }
 
 var utils = new Utils();

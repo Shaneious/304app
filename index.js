@@ -6,7 +6,7 @@ var fs = require('fs');
 
 function mainCall() {
   utils.startAnim("fetching pages", 100);
-  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 2)
+  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 1)
 	.then(allPages => {
     utils.stopAnim();
     console.log("finished.");
@@ -17,41 +17,46 @@ function mainCall() {
       const filteredPages = utils.filterPages(allPages);
       console.log(`NUM PAGES (verified): ${filteredPages.length}`);
 
-      const sampledPages = utils.randomSamplePages(filteredPages,100);
+      // not sampling here...
+      const sampledPages = utils.randomSamplePages(filteredPages,10000000);
       console.log(`NUM SAMPLES PAGES: ${sampledPages.length}`);
 
       fetch.stratify(sampledPages).then(strata => {
         console.log("These are the stratas");
         console.log(strata); // this is the strata (page titles, for use with analyze)
-        writeJSON(strata);
+        // Stratified sampling...
+        let randomRevisions = utils.randomRevisionsStratified(strata, 100);
+        // Regular random sampling...
+        // utils.randomRevisions(strata, 100);
+        console.log(randomRevisions.length);
+        writeJSON(randomRevisions);
       });
     }, 200);
   });
 }
 
 //analyze.doAnalysis("Artificial intelligence",2016);
-function getAnalysis(strata){
+function getAnalysis(revisions){
   let promises = [];
   return new Promise(resolve=>{
 
-    for (stratum in strata){
-      for (index in strata[stratum]){
-        var min = parseInt(stratum[1]); 
-        var year = 2000 + ((Math.floor(Math.random()*(5-min)) + min)*4);
-        promises.push(analyze.doAnalysis(strata[stratum][index], year));
-/*     var i = 5 - parseInt(stratum[1]);  
-        while (i > 0){
-          var year = 2000 + (i*4);
-          promises.push(analyze.doAnalysis(strata[stratum][index], year));
-          i--;
-        }*/
-      }
+    // for (stratum in strata){
+    //   for (index in strata[stratum]){
+    //     var min = parseInt(stratum[1]); 
+    //     var year = 2000 + ((Math.floor(Math.random()*(5-min)) + min)*4);
+    //     promises.push(analyze.doAnalysis(strata[stratum][index], year));
+    //   }
+    // }
+    for (i in revisions) {
+      promises.push(analyze.doAnalysis(revisions[i].title,
+                                        revisions[i].year));
     }
-    resolve(promises); 
+
+    resolve(promises);
   });
 }
 
-function writeJSON(strata){
+function writeJSON(revisions){
   let aiPages = {
     title: [], year: [], strata: [], wordcount: [], numNouns: [], numUniqueNouns: [], numVerbs: [], 
     numUniqueVerbs: [], numAdjectives: [], numUniqueAdjectives: [], numAdverbs: [], numUniqueAdverbs:[],
@@ -60,7 +65,7 @@ function writeJSON(strata){
   }
 
   utils.startAnim("Creating JSON Document",50);
-  getAnalysis(strata)
+  getAnalysis(revisions)
   .then(promises=>{
     Promise.all(promises)
     .then(data=>{
