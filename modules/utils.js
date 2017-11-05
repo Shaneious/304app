@@ -166,6 +166,31 @@ function Utils() {
       }
       return revisions;
     }
+
+    this.allRevisions = function(strata) {
+      let revisions = [];
+
+      for(key in strata) {
+        for(title in strata[key]) {
+          if(key == "s1") {
+            revisions.push({title:title,year:2004});
+            revisions.push({title:title,year:2008});
+            revisions.push({title:title,year:2012});
+            revisions.push({title:title,year:2016});
+          } else if(key == "s2") {
+            revisions.push({title:title,year:2008});
+            revisions.push({title:title,year:2012});
+            revisions.push({title:title,year:2016});
+          } else if(key == "s3") {
+            revisions.push({title:title,year:2012});
+            revisions.push({title:title,year:2016});
+          } else if(key == "s4") {
+            revisions.push({title:title,year:2016});
+          }
+        }
+      }
+      return revisions;
+    }
 }
 
 var utils = new Utils();

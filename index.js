@@ -6,7 +6,7 @@ var fs = require('fs');
 
 function mainCall() {
   utils.startAnim("fetching pages", 100);
-  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 1)
+  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 2)
 	.then(allPages => {
     utils.stopAnim();
     console.log("finished.");
@@ -25,9 +25,9 @@ function mainCall() {
         console.log("These are the stratas");
         console.log(strata); // this is the strata (page titles, for use with analyze)
         // Stratified sampling...
-        let randomRevisions = utils.randomRevisionsStratified(strata, 100);
+        // let randomRevisions = utils.randomRevisionsStratified(strata, 1000);
         // Regular random sampling...
-        // utils.randomRevisions(strata, 100);
+        let randomRevisions = utils.allRevisions(strata);
         console.log(randomRevisions.length);
         writeJSON(randomRevisions);
       });
@@ -47,12 +47,23 @@ function getAnalysis(revisions){
     //     promises.push(analyze.doAnalysis(strata[stratum][index], year));
     //   }
     // }
-    for (i in revisions) {
-      promises.push(analyze.doAnalysis(revisions[i].title,
-                                        revisions[i].year));
-    }
+    // for (i in revisions) {
+    //   promises.push(analyze.doAnalysis(revisions[i].title,
+    //                                     revisions[i].year));
+    // }
+    let counter = revisions.length-1;
+    let interval = setInterval(function() {
+      console.log(`${counter}: analyzing ...`);
+      promises.push(analyze.doAnalysis(revisions[counter].title,
+              revisions[counter].year));
+      counter --;
+      if(counter < 0) {
+        clearInterval(interval);
+        resolve(promises);
+      }
+    }, 50);
 
-    resolve(promises);
+    
   });
 }
 
@@ -63,8 +74,6 @@ function writeJSON(revisions){
     remaining: [], popularNoun: [], popularVerb: [], popularAdjective: [], popularAdverb: [],
     popularWord: [], sentiment: [], comparative: [], polarity: [], subjectivity: [], positive: [] 
   }
-
-  utils.startAnim("Creating JSON Document",50);
   getAnalysis(revisions)
   .then(promises=>{
     Promise.all(promises)
@@ -79,7 +88,6 @@ function writeJSON(revisions){
 
       var jsonData =  JSON.stringify(aiPages);
       fs.writeFile('data.json', jsonData, 'utf8',()=>{});
-      utils.stopAnim();
     });
   });
 }
