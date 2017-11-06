@@ -21,13 +21,13 @@ function mainCall() {
       const sampledPages = utils.randomSamplePages(filteredPages,10000000);
       console.log(`NUM SAMPLES PAGES: ${sampledPages.length}`);
 
-      fetch.stratify(sampledPages).then(strata => {
+      fetch.stratify(sampledPages.slice(0,20)).then(strata => {
         console.log("These are the stratas");
         console.log(strata); // this is the strata (page titles, for use with analyze)
         // Stratified sampling...
         // let randomRevisions = utils.randomRevisionsStratified(strata, 1000);
         // Regular random sampling...
-        let revisions = utils.stratifiedRevisions(strata,1000);
+        let revisions = utils.allRevisions(strata);
         console.log(revisions.length);
         writeJSON(revisions);
       });
@@ -61,7 +61,7 @@ function getAnalysis(revisions){
         clearInterval(interval);
         resolve(promises);
       }
-    }, 50);
+    }, 20);
 
     
   });
@@ -86,7 +86,9 @@ function writeJSON(revisions){
         }
       }
 
-      var jsonData =  JSON.stringify(aiPages);
+      // keep only 20 results
+      let json = utils.randomPrune(aiPages, 20);
+      let jsonData =  JSON.stringify(json);
       fs.writeFile('data.json', jsonData, 'utf8',()=>{});
     });
   });

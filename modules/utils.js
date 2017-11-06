@@ -123,6 +123,16 @@ function Utils() {
       return revisions;
     }
 
+    this.randomPrune = function(json, newSize) {
+      while(json["title"].length > newSize) {
+        randomRow = Math.floor(Math.random()*json["title"].length);
+        for(idx in json) {
+          json[idx].splice(randomRow,1);
+        }
+      }
+      return json;
+    }
+
     this.stratifiedRevisions = function(strata, sampleSize) {
       let revisions = [];
       let s1r = strata.s1.length;
