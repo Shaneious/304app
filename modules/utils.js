@@ -123,7 +123,7 @@ function Utils() {
       return revisions;
     }
 
-    this.randomRevisionsStratified = function(strata, sampleSize) {
+    this.stratifiedRevisions = function(strata, sampleSize) {
       let revisions = [];
       let s1r = strata.s1.length;
       let s2r = s1r + strata.s2.length;
