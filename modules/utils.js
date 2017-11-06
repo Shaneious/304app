@@ -123,6 +123,43 @@ function Utils() {
       return revisions;
     }
 
+    function getRandomYearIdx(yearLst, year) {
+      while(true){
+        let rand = Math.floor(Math.random()*yearLst.length);
+        if(yearLst[rand] == year) {
+          return rand;
+        }
+      }
+    }
+
+    this.proportionalPrune = function(json, newSize) {
+      let ratio = {2004: 0, 2008: 0, 2012: 0, 2016: 0};
+      let toRemove = {2004: 0, 2008: 0, 2012: 0, 2016: 0};
+      for(idx in json["year"]) {
+        ratio[json["year"][idx]] ++;
+      }
+      let total = json["year"].length;
+
+      if(newSize >= total) {
+        return json;
+      }
+      
+      console.log(ratio);
+      for(idx in toRemove) {
+        toRemove[idx] = ratio[idx] - Math.round(ratio[idx]*(newSize/total));
+      }
+      console.log(toRemove);
+      for(idx in toRemove) {
+        for(var i=0; i < toRemove[idx]; i++) {
+          let rmvIdx = getRandomYearIdx(json["year"],idx);
+          for(attr in json) {
+            json[attr].splice(rmvIdx, 1);
+          }
+        }
+      }
+      return json;
+    }
+
     this.randomPrune = function(json, newSize) {
       while(json["title"].length > newSize) {
         randomRow = Math.floor(Math.random()*json["title"].length);

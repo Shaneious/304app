@@ -87,7 +87,9 @@ function writeJSON(revisions){
       }
 
       // keep only 20 results
-      let json = utils.randomPrune(aiPages, 20);
+      console.log(aiPages["title"].length);
+      let json = utils.proportionalPrune(aiPages, 20);
+      console.log(json["title"].length);
       let jsonData =  JSON.stringify(json);
       fs.writeFile('data.json', jsonData, 'utf8',()=>{});
     });
