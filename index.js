@@ -85,7 +85,6 @@ function writeJSON(revisions){
           aiPages[characteristic].push(data[index][characteristic]);
         }
       }
-
       // keep only 20 results
       console.log(aiPages["title"].length);
       let json = utils.proportionalPrune(aiPages, 20);
