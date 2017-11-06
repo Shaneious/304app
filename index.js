@@ -27,9 +27,9 @@ function mainCall() {
         // Stratified sampling...
         // let randomRevisions = utils.randomRevisionsStratified(strata, 1000);
         // Regular random sampling...
-        let randomRevisions = utils.allRevisions(strata);
-        console.log(randomRevisions.length);
-        writeJSON(randomRevisions);
+        let revisions = utils.stratifiedRevisions(strata,1000);
+        console.log(revisions.length);
+        writeJSON(revisions);
       });
     }, 200);
   });
