@@ -8,6 +8,8 @@ var WordPOS = require('wordpos'),
 var utils = require('./utils');
 var fetch = require('./fetch');
 var regex = require('word-regex')();
+var Tokenizer = require('sentence-tokenizer');
+var tokenizer = new Tokenizer('Chuck');
 
 function Analyze() {
     this.doAnalysis = function(pageTitle, year) {
@@ -63,14 +65,30 @@ function Analyze() {
                 const textSentiment = sentiment(text);
                 ret["sentiment"] = textSentiment.score;
                 ret["comparative"] = textSentiment.comparative;
+
                 emotional.load(function() {
-                    const textEmotion = emotional.get(text);
-                    ret["polarity"] = textEmotion.polarity;
-                    ret["subjectivity"] = textEmotion.subjectivity;
-                    const textPositive = emotional.positive(text);
-                    ret["positive"] = textPositive;
-                    // utils.stopAnim();
-                    resolve(ret);
+                    count = 0;
+                    sumSubj = 0;
+                    sumPolar = 0;
+                    sumPositive = 0;
+                    tokenizer.setEntry(text);
+                    tokenizer.getSentences().forEach((sentence)=>{
+                        data = emotional.get(sentence);
+                        sumSubj += data.subjectivity;
+                        sumPolar += data.polarity;
+
+                        if (emotional.positive(sentence))
+                            sumPositive ++;
+                        else 
+                            sumPositive --;
+
+                        count++;
+                    });
+
+                    ret["polarity"] = sumPolar/count;
+                    ret["subjectivity"] = sumSubj/count;
+                    ret["positive"] = (sumPositive>0);
+                    resolve(ret);   
                 });
             });         
         });

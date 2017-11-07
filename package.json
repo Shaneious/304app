@@ -17,6 +17,8 @@
     "google-spreadsheet": "^2.0.4",
     "html-to-text": "^3.3.0",
     "node-wikipedia": "0.0.2",
+    "sentence-splitter": "^2.3.2",
+    "sentence-tokenizer": "^1.0.0",
     "sentiment": "^4.1.0",
     "unirest": "^0.5.1",
     "word-count": "^0.2.2",
