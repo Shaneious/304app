@@ -3,8 +3,29 @@ var utils = require('./modules/utils');
 var analyze = require('./modules/analyze');
 var fetch = require('./modules/fetch');
 var fs = require('fs');
+var emotional = require('emotional');
 var OVERSHOOT = 800;
 var PRUNETO = 716;
+
+emotional.load(function() {
+  var text = "I am the NYTimes bestselling author of The Subtle Art "+
+  "of Not Giving a Fuck, a blogger, and internet entrepreneur. I write"+ 
+  "about big ideas and give life advice that doesn’t suck. Some people "+
+  "say I’m an idiot. Other people say I saved their life. Read and decide"+
+  " for yourself.";
+  const textEmotion = emotional.get(text);
+  console.log(textEmotion.subjectivity);
+
+  sentences = text.split(".");
+  sentences.splice(sentences.length-1,1);
+  sumSubj = 0;
+  count = 0;
+  for(idx in sentences) {
+    sumSubj += emotional.get(sentences[idx]).subjectivity;
+    count ++;
+  }
+  console.log(sumSubj/count);
+});
 
 function mainCall() {
   utils.startAnim("fetching pages", 100);
@@ -96,7 +117,7 @@ function writeJSON(revisions){
 }
 
 // UNCOMMENT THIS TO RUN
-mainCall();
+// mainCall();
 
 // UNCOMMENT to ANALYZE (e.g. AI page)
 // analyze.doAnalysis("Artificial intelligence", 2017).then(analyzed => {console.log(analyzed)});
