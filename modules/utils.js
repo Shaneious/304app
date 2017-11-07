@@ -132,6 +132,24 @@ function Utils() {
       }
     }
 
+    function getObjSum(obj){
+      let sum = 0;
+      for(idx in obj) {
+        sum += obj[idx];
+      }
+      return;
+    }
+
+    function getMaxIdx(obj){
+      let retIdx = 0;
+      for(idx in obj){
+        if(obj[idx] > obj[retIdx]){
+          retIdx = idx;
+        }
+      }
+      return retIdx;
+    }
+
     this.proportionalPrune = function(json, newSize) {
       let ratio = {2004: 0, 2008: 0, 2012: 0, 2016: 0};
       let toRemove = {2004: 0, 2008: 0, 2012: 0, 2016: 0};
@@ -148,6 +166,13 @@ function Utils() {
       for(idx in toRemove) {
         toRemove[idx] = ratio[idx] - Math.round(ratio[idx]*(newSize/total));
       }
+      while((total - getObjSum(toRemove)) < newSize){
+        toRemove[getMaxIdx(toRemove)] --;
+      }
+      while((total - getObjSum(toRemove)) > newSize){
+        toRemove[getMaxIdx(toRemove)] ++;
+      }
+
       console.log(toRemove);
       for(idx in toRemove) {
         for(var i=0; i < toRemove[idx]; i++) {
