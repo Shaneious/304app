@@ -3,10 +3,12 @@ var utils = require('./modules/utils');
 var analyze = require('./modules/analyze');
 var fetch = require('./modules/fetch');
 var fs = require('fs');
+var OVERSHOOT = 800;
+var PRUNETO = 716;
 
 function mainCall() {
   utils.startAnim("fetching pages", 100);
-  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 1)
+  fetch.getAllPages([{pageid: 1164, title:"Category:Artificial intelligence"}], 2)
 	.then(allPages => {
     utils.stopAnim();
     console.log("finished.");
@@ -21,13 +23,13 @@ function mainCall() {
       const sampledPages = utils.randomSamplePages(filteredPages,10000000);
       console.log(`NUM SAMPLES PAGES: ${sampledPages.length}`);
 
-      fetch.stratify(sampledPages.slice(0,20)).then(strata => {
+      fetch.stratify(sampledPages).then(strata => {
         console.log("These are the stratas");
         console.log(strata); // this is the strata (page titles, for use with analyze)
         // Stratified sampling...
         // let randomRevisions = utils.randomRevisionsStratified(strata, 1000);
         // Regular random sampling...
-        let revisions = utils.allRevisions(strata);
+        let revisions = utils.stratifiedRevisions(strata,OVERSHOOT);
         console.log(revisions.length);
         writeJSON(revisions);
       });
@@ -61,9 +63,7 @@ function getAnalysis(revisions){
         clearInterval(interval);
         resolve(promises);
       }
-    }, 20);
-
-    
+    }, 50);
   });
 }
 
@@ -85,9 +85,9 @@ function writeJSON(revisions){
           aiPages[characteristic].push(data[index][characteristic]);
         }
       }
-      // keep only 20 results
+
       console.log(aiPages["title"].length);
-      let json = utils.proportionalPrune(aiPages, 20);
+      let json = utils.proportionalPrune(aiPages, PRUNETO);
       console.log(json["title"].length);
       let jsonData =  JSON.stringify(json);
       fs.writeFile('data.json', jsonData, 'utf8',()=>{});
