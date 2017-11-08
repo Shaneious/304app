@@ -161,11 +161,14 @@ function Utils() {
       if(newSize >= total) {
         return json;
       }
-      
+      let proportions = [384/5027,1162/5027,1549/5027,1932/5027];
+      let counter = 0;
       console.log(ratio);
       for(idx in toRemove) {
-        toRemove[idx] = ratio[idx] - Math.round(ratio[idx]*(newSize/total));
+        toRemove[idx] = ratio[idx] - Math.round(newSize*proportions[counter]);
+        counter++;
       }
+
       while((total - getObjSum(toRemove)) < newSize){
         toRemove[getMaxIdx(toRemove)] --;
       }
@@ -208,7 +211,12 @@ function Utils() {
       let s2p = s2r / total;
       let s3p = s3r / total;
       let s4p = s4r / total;
-      
+
+      s1p = 384/5027;
+      s2p = 1162/5027;
+      s3p = 1549/5027;
+      s4p = 1932/5027;
+
       let s1Titles = strata.s1;
       let s2Titles = strata.s2.concat(s1Titles);
       let s3Titles = strata.s3.concat(s2Titles);
