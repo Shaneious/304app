@@ -137,7 +137,7 @@ function Utils() {
       for(idx in obj) {
         sum += obj[idx];
       }
-      return;
+      return sum;
     }
 
     function getMaxIdx(obj){
@@ -168,13 +168,43 @@ function Utils() {
         toRemove[idx] = ratio[idx] - Math.round(newSize*proportions[counter]);
         counter++;
       }
+      console.log(total);
+      console.log(getObjSum(toRemove));
+      console.log(toRemove);
+      if(newSize > total - getObjSum(toRemove)){
+        console.log("1");
+        toRemove["2016"] --;
+      }
+      if(newSize > total - getObjSum(toRemove)){
+        console.log("1");
+        toRemove["2012"] --;
+      }
+      if(newSize > total - getObjSum(toRemove)){
+        console.log("1");
+        toRemove["2008"] --;
+      }
+      if(newSize > total - getObjSum(toRemove)){
+        console.log("1");
+        toRemove["2004"] --;
+      }
 
-      while((total - getObjSum(toRemove)) < newSize){
-        toRemove[getMaxIdx(toRemove)] --;
+      if(newSize < total - getObjSum(toRemove)){
+        console.log("1");
+        toRemove["2016"] ++;
       }
-      while((total - getObjSum(toRemove)) > newSize){
-        toRemove[getMaxIdx(toRemove)] ++;
+      if(newSize < total - getObjSum(toRemove)){
+        console.log("1");
+        toRemove["2012"] ++;
       }
+      if(newSize < total - getObjSum(toRemove)){
+        console.log("1");
+        toRemove["2008"] ++;
+      }
+      if(newSize < total - getObjSum(toRemove)){
+        console.log("1");
+        toRemove["2004"] ++;
+      }
+      console.log(toRemove);
 
       console.log(toRemove);
       for(idx in toRemove) {
