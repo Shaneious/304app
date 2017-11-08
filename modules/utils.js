@@ -168,16 +168,14 @@ function Utils() {
         toRemove[idx] = ratio[idx] - Math.round(newSize*proportions[counter]);
         counter++;
       }
-      console.log(total);
-      console.log(getObjSum(toRemove));
-      console.log(toRemove);
-      if(newSize > total - getObjSum(toRemove)){
-        console.log("1");
-        toRemove["2016"] --;
-      }
+
       if(newSize > total - getObjSum(toRemove)){
         console.log("1");
         toRemove["2012"] --;
+      }
+      if(newSize > total - getObjSum(toRemove)){
+        console.log("1");
+        toRemove["2016"] --;
       }
       if(newSize > total - getObjSum(toRemove)){
         console.log("1");
@@ -190,11 +188,11 @@ function Utils() {
 
       if(newSize < total - getObjSum(toRemove)){
         console.log("1");
-        toRemove["2016"] ++;
+        toRemove["2012"] ++;
       }
       if(newSize < total - getObjSum(toRemove)){
         console.log("1");
-        toRemove["2012"] ++;
+        toRemove["2016"] ++;
       }
       if(newSize < total - getObjSum(toRemove)){
         console.log("1");
