@@ -171,7 +171,7 @@ function Utils() {
 
       if(newSize > total - getObjSum(toRemove)){
         console.log("1");
-        toRemove["2012"] --;
+        toRemove["2008"] --;
       }
       if(newSize > total - getObjSum(toRemove)){
         console.log("1");
@@ -179,7 +179,7 @@ function Utils() {
       }
       if(newSize > total - getObjSum(toRemove)){
         console.log("1");
-        toRemove["2008"] --;
+        toRemove["2012"] --;
       }
       if(newSize > total - getObjSum(toRemove)){
         console.log("1");
@@ -188,7 +188,7 @@ function Utils() {
 
       if(newSize < total - getObjSum(toRemove)){
         console.log("1");
-        toRemove["2012"] ++;
+        toRemove["2008"] ++;
       }
       if(newSize < total - getObjSum(toRemove)){
         console.log("1");
@@ -196,7 +196,7 @@ function Utils() {
       }
       if(newSize < total - getObjSum(toRemove)){
         console.log("1");
-        toRemove["2008"] ++;
+        toRemove["2012"] ++;
       }
       if(newSize < total - getObjSum(toRemove)){
         console.log("1");
