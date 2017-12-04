@@ -34,7 +34,7 @@ function Analyze() {
                 nounProperties = getProperties(wordList,obj.nouns);
                 ret["numNouns"] = nounProperties["count"];
                 ret["numUniqueNouns"] = obj.nouns.length;
-                ret["popularNoun"] = nounProperties["commonWord"];
+                ret["popularNoun"] = nounProperties["commonWord"];                      
 
                 /* Verb Counts*/
                 verbProperties = getProperties(wordList,obj.verbs);

@@ -161,7 +161,10 @@ function Utils() {
       if(newSize >= total) {
         return json;
       }
-      let proportions = [384/5027,1162/5027,1549/5027,1932/5027];
+      //let proportions = [384/5027,1162/5027,1549/5027,1932/5027];
+
+      let proportions = [384/1934, 778/1934, 388/1934, 384/1934];
+      console.log(proportions);
       let counter = 0;
       console.log(ratio);
       for(idx in toRemove) {
@@ -228,32 +231,37 @@ function Utils() {
 
     this.stratifiedRevisions = function(strata, sampleSize) {
       let revisions = [];
-      let s1r = strata.s1.length;
+      /*let s1r = strata.s1.length;
       let s2r = s1r + strata.s2.length;
       let s3r = s2r + s1r + strata.s3.length;
-      let s4r = s3r + s2r + s1r + strata.s4.length;
+      let s4r = s3r + s2r + s1r + strata.s4.length;*/
+
+      let s1r = strata.s1.length;
+      let s2r = strata.s2.length;
+      let s3r = strata.s3.length;
+      let s4r = strata.s4.length;
 
       let total = s1r + s2r + s3r + s4r;
 
-      let s1p = s1r / total;
+     /* let s1p = s1r / total;
       let s2p = s2r / total;
       let s3p = s3r / total;
-      let s4p = s4r / total;
+      let s4p = s4r / total;*/
 
-      s1p = 384/5027;
-      s2p = 1162/5027;
-      s3p = 1549/5027;
-      s4p = 1932/5027;
+      s1p = 384/1934;
+      s2p = 778/1934;
+      s3p = 388/1934;
+      s4p = 384/1934;
 
-      let s1Titles = strata.s1;
+      /*let s1Titles = strata.s1;
       let s2Titles = strata.s2.concat(s1Titles);
       let s3Titles = strata.s3.concat(s2Titles);
-      let s4Titles = strata.s4.concat(s3Titles);
-
-      revisions = revisions.concat(randomSelect(s1Titles, Math.round(sampleSize*s1p), 2004));
-      revisions = revisions.concat(randomSelect(s2Titles, Math.round(sampleSize*s2p), 2008));
-      revisions = revisions.concat(randomSelect(s3Titles, Math.round(sampleSize*s3p), 2012));
-      revisions = revisions.concat(randomSelect(s4Titles, Math.round(sampleSize*s4p), 2016));
+      let s4Titles = strata.s4.concat(s3Titles);*/
+      //console.log(total);console.log(s1r);console.log(s1p);console.log(sampleSize);console.log(Math.round(sampleSize*s1p));
+      revisions = revisions.concat(randomSelect(strata.s1, Math.round(sampleSize*s1p), 2004));
+      revisions = revisions.concat(randomSelect(strata.s2, Math.round(sampleSize*s2p), 2008));
+      revisions = revisions.concat(randomSelect(strata.s3, Math.round(sampleSize*s3p), 2012));
+      revisions = revisions.concat(randomSelect(strata.s4, Math.round(sampleSize*s4p), 2016));
       return revisions;
     }
 

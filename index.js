@@ -4,8 +4,8 @@ var analyze = require('./modules/analyze');
 var fetch = require('./modules/fetch');
 var fs = require('fs');
 var emotional = require('emotional');
-var OVERSHOOT = 1200;
-var PRUNETO = 1000;
+var OVERSHOOT = 500;
+var PRUNETO = 367;
 
 var Tokenizer = require('sentence-tokenizer');
 var tokenizer = new Tokenizer('Chuck');
@@ -51,6 +51,7 @@ function mainCall() {
       fetch.stratify(sampledPages).then(strata => {
         console.log("These are the stratas");
         console.log(strata); // this is the strata (page titles, for use with analyze)
+
         // Stratified sampling...
         // let randomRevisions = utils.randomRevisionsStratified(strata, 1000);
         // Regular random sampling...
@@ -99,6 +100,7 @@ function writeJSON(revisions){
     remaining: [], popularNoun: [], popularVerb: [], popularAdjective: [], popularAdverb: [],
     popularWord: [], sentiment: [], comparative: [], polarity: [], subjectivity: [], positive: [] 
   }
+
   getAnalysis(revisions)
   .then(promises=>{
     Promise.all(promises)
